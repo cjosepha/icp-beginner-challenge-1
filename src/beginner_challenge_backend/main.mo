@@ -50,13 +50,54 @@ actor {
         nextUserId := nextUserId + 1;
 
         return #ok({ id = userId; name = name });
+
     };
 
     public shared ({ caller }) func addUserResult(result : Text) : async Result.Result<{ id : Nat; results : [Text] }, Text> {
-        return #ok({ id = 123; results = ["fake result"] });
+
+        switch (Map.get(userIdMap, phash, caller)) {
+            case (?userId) {
+                let handleResult = func (results : Vector.Vector<Text>) : Result.Result<{ id : Nat; results : [Text] }, Text> {
+                    Vector.add(results, result);
+                    Map.set(userResultsMap, nhash, userId, results);
+                    return #ok({ id = userId; results = Vector.toArray(results) });
+                };
+                switch(Map.get(userResultsMap, nhash, userId)) {
+                    case (?results) {
+                        return handleResult(results);
+                    };
+                    case (_) {
+                        return handleResult(Vector.new<Text>());
+                    };
+                };
+            };
+            case (_) {
+                return #err("User not found");
+            };
+        };
+
     };
 
     public query ({ caller }) func getUserResults() : async Result.Result<{ id : Nat; results : [Text] }, Text> {
-        return #ok({ id = 123; results = ["fake result"] });
+        
+        switch (Map.get(userIdMap, phash, caller)) {
+            case (?userId) {
+                let handleResult = func (results : Vector.Vector<Text>) : Result.Result<{ id : Nat; results : [Text] }, Text> {
+                    return #ok({ id = userId; results = Vector.toArray(results) });
+                };
+                switch(Map.get(userResultsMap, nhash, userId)) {
+                    case (?results) {
+                        return handleResult(results);
+                    };
+                    case (_) {
+                        return handleResult(Vector.new<Text>());
+                    };
+                };
+            };
+            case (_) {
+                return #err("User not found");
+            };
+        };
+        
     };
 };
