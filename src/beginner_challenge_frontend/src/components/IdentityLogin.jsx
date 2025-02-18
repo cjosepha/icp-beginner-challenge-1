@@ -7,6 +7,7 @@ import {
 } from "declarations/beginner_challenge_backend";
 
 function IdentityLogin(props) {
+  
   async function handleLogin() {
     const authClient = await AuthClient.create();
     const identity_url =
@@ -36,6 +37,7 @@ function IdentityLogin(props) {
       Login with <strong>Internet Identity</strong>
     </button>
   );
+  
 }
 
 export default IdentityLogin;
